@@ -1,0 +1,19 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "daws",
+  "outputfilename": "daws",
+  "frontend:install": "pnpm install",
+  "frontend:build": "pnpm run build",
+  "frontend:dev:watcher": "pnpm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Kilroth",
+    "email": "kilroth100@gmail.com"
+  },
+  "bindings": {
+    "v2": {
+      "webkit": "4.1"
+    }
+  },
+  "flags": "-tags webkit2_41"
+}
