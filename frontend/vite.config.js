@@ -1,7 +1,23 @@
-import {defineConfig} from 'vite'
-import {svelte} from '@sveltejs/vite-plugin-svelte'
+import { sveltekit } from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [svelte()]
-})
+	plugins: [sveltekit()],
+	server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true, // Prevents Vite from jumping to 5174 if 5173 is "busy"
+        hmr: {
+            protocol: 'ws',
+            host: 'localhost',
+            port: 5173
+        },
+        watch: {
+            usePolling: true,
+            interval: 100
+        },
+        fs: {
+            allow: ['./src/lib/wailsjs', './src/lib', '..'] 
+        }
+	}
+});
