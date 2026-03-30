@@ -1,6 +1,16 @@
 <script lang="ts">
+    import {projectState} from "$lib/stores/project.svelte";
+    import { onMount } from "svelte";
 
+    onMount(async () => {
+        await projectState.refresh();
+    });
 </script>
 
-<h1>Welcome to D-AWS!</h1>
-<p>This is the home page. Use the sidebar to navigate to your projects.</p>
+{#if !projectState.data}
+    <p>Loading projects...</p>
+{:else if Object.keys(projectState.data.projects).length === 0}
+    <p>No projects found. Use the sidebar to create your first project.</p>
+{:else}
+
+{/if}

@@ -1,45 +1,71 @@
 <script lang="ts">
   import { projectState } from '$lib/stores/project.svelte';
   import {goto} from '$app/navigation';
+    import Button from './basic/button.svelte';
 
   async function handleAddProject() {
-    const projectName = prompt("Enter a name for the new project:");
-    if (projectName) {
-      try {
-        await projectState.createProject({ Name: projectName });
-        goto(`/project/${encodeURIComponent(projectName)}`);
-      } catch (error) {
-        alert(`Failed to create project: ${error.message}`);
-      }
-    }
+    goto('/projects/new');
+  }
+
+  const handleProjectClick = (projectName: string) => {
+    goto(`/project/${encodeURIComponent(projectName)}`);
+  }
+
+  const handleConfigClick = () => {
+    goto('/config');
   }
 </script>
 
 <aside class="sidebar">
-  <h2>Projects</h2>
-  <nav class="project-list">
-    {#if projectState.data}
-      {#each Object.values(projectState.data.projects) as project}
-        <div class="project-button">
-          <a href={`/project/${encodeURIComponent(project.Name)}`} class="project-link">{project.Name}</a>
-          <button on:click={() => projectState.deleteProject(project.Name)}>Delete</button>
-        </div>
-      {/each}
-    {:else}
-      <p>Loading Projects...</p>
-    {/if}
-  </nav>
-  <button on:click={handleAddProject}>Add Project</button>
+  <div class="header">
+    <h2 class="header__title">Projects</h2>
+    <Button subtype="icon" onClick={handleConfigClick}>&#x2699;</Button>
+  </div>
+  <div class="list">
+    <nav class="project-list">
+      {#if !projectState.data}
+        <p>Loading Projects...</p>
+      {:else if Object.keys(projectState.data.projects).length === 0}
+        <p>No projects found. Use the button below to create your first project.</p>
+      {:else}
+        {#each Object.values(projectState.data.projects) as project}
+        <Button subtype="primary" onClick={() => {handleProjectClick(project.name)}}>
+          {project.name}
+        </Button>
+          <div class="project-button">
+            <a href={`/project/${encodeURIComponent(project.name)}`} class="project-link">{project.name}</a>
+            <button on:click={() => projectState.deleteProject(project.name)}>Delete</button>
+          </div>
+        {/each}
+      {/if}
+    </nav>
+    <Button subtype="add" onClick={handleAddProject}>Add Project</Button>
+  </div>
 </aside>
 
 <style lang="scss">
 .sidebar {
   display: flex;
   flex-direction: column;
-  width: 256px;
-  padding: 20px;
+  width: 320px;
   background-color: #484848;
   z-index: 100;
+
+  .header {
+    background-color: #282828;
+    color: #ccc;
+    padding: calc($padding * 2);
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  }
 
   .project-button {
     margin-bottom: 10px;
@@ -47,6 +73,28 @@
 
   .project-link {
     text-decoration: underline;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: $padding;
+    flex: 1;
+    padding: $padding calc($padding * 2);
+  }
+
+  .bottom {
+    background-color: #282828;
+    color: #ccc;
+    padding: $padding;
+    justify-self: flex-end;
+    font-size: 32px;
+    width: calc(100% - ($padding * 2));
+    display: flex;
+
+    .config {
+      justify-self: flex-end;
+    }
   }
 }
 </style>

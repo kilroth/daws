@@ -5,7 +5,6 @@ class ProjectState {
     data = $state<models.AppData | null>(null);
 
     async refresh() {
-
         try {
             //this.data = await GetInitialData();
             this.data = await DataLoad();

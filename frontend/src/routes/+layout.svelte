@@ -1,26 +1,14 @@
 <script lang="ts">
-    import "../style.css";
-    import {onMount} from "svelte";
-    import {projectState} from "$lib/stores/project.svelte";
+    import "../style.scss";
     import Sidebar from "$lib/components/sidebar.svelte";
 
     let {children} = $props();
-
-    onMount(async () => {
-        await projectState.refresh();
-    });
 </script>
 
 <div class="daws">
     <Sidebar />
     <main class="main-content">
-        {#if !projectState.data}
-            <p>Loading projects...</p>
-        {:else if Object.keys(projectState.data.projects).length === 0}
-            <p>No projects found. Use the sidebar to create your first project.</p>
-        {:else}
-             {@render children()}
-        {/if}
+        {@render children()}
     </main>
 </div>
 

@@ -1,23 +1,8 @@
 package app
 
 import (
-	"os"
-	"path/filepath"
-
 	md "daws/internal/models"
 )
-
-func (a *App) CheckProjectsDir() error {
-	projectsDir := filepath.Join(a.SM.GetDataDir(), "projects")
-	if _, err := os.Stat(projectsDir); os.IsNotExist(err) {
-		md.Logger.Warn("Projects directory does not exist, creating: %s", projectsDir)
-		err := os.MkdirAll(projectsDir, os.ModePerm)
-		if err != nil {
-			md.Logger.Panic("Failed to create projects directory: %v", err)
-		}
-	}
-	return nil
-}
 
 func (a *App) DataLoad() (md.AppData, error) {
 	var data md.AppData

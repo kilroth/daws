@@ -6,7 +6,7 @@
   "frontend:build": "pnpm build",
   "frontend:dev:watcher": "pnpm dev",
   "frontend:dev:serverUrl": "http://localhost:5173",
-  "frontend:dir": "frontend/dist",
+  "frontend:dir": "frontend",
   "wailsjsdir": "./frontend/src/lib",
   "assetdir": "./frontend/build",
   "author": {

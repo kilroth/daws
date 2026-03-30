@@ -19,5 +19,17 @@ export default defineConfig({
         fs: {
             allow: ['./src/lib/wailsjs', './src/lib', '..'] 
         }
-	}
+	},
+    css: {
+        preprocessorOptions: {
+            api: 'modern-compiler',
+            scss: {
+                additionalData: `
+                    @import "$lib/styles/__variables.scss";
+                    @import "$lib/styles/__colors.scss";
+                    @import "$lib/styles/__common.scss";
+                `
+            }
+        }
+    }
 });
