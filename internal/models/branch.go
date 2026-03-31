@@ -1,14 +1,14 @@
 package models
 
 type Branch struct {
-	Name         string        `json:"name"`
-	GitName      string        `json:"gitName"`
-	Description  string        `json:"description"`
-	AWSAccount   string        `json:"awsAccount"`
-	AWSLocations []AWSLocation `json:"awsLocations"`
-	LastBuild    string        `json:"lastBuild"`
-	IsActive     bool          `json:"isActive"`
-	Archived     bool          `json:"archived"`
+	Name           string         `json:"name"`
+	GitName        string         `json:"gitName"`
+	Description    string         `json:"description"`
+	AWSCredentials AWSCredentials `json:"awsCredentials"`
+	AWSLocations   []AWSLocation  `json:"awsLocations"`
+	LastBuild      string         `json:"lastBuild"`
+	IsActive       bool           `json:"isActive"`
+	Archived       bool           `json:"archived"`
 }
 
 func (b *Branch) Deploy() error {
@@ -18,5 +18,11 @@ func (b *Branch) Deploy() error {
 
 func (b *Branch) RunTests() error {
 	var err error
+	return err
+}
+
+func (b *Branch) Save_Preprocess() error {
+	var err error
+	err = b.AWSCredentials.EncryptAll()
 	return err
 }

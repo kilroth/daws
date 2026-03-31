@@ -1,7 +1,7 @@
 package storage
 
 import (
-	md "daws/internal/models"
+	"daws/internal/utils"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -20,13 +20,13 @@ func isWailsDev() bool {
 
 func getBasePath() string {
 	if isWailsDev() {
-		md.Logger.Info("Running in development mode, using current directory for storage")
+		utils.Logger.Info("Running in development mode, using current directory for storage")
 		basePath, _ := os.Getwd()
 		return filepath.Join(basePath, ".dev_data")
 	}
 	ex, err := os.Executable()
 	if err != nil {
-		md.Logger.Panic("Failed to get executable path: %v", err)
+		utils.Logger.Panic("Failed to get executable path: %v", err)
 	}
 	exPath := filepath.Dir(ex)
 	return filepath.Join(exPath, "data")
@@ -52,33 +52,19 @@ func slugify(name string) string {
 }
 
 func NewStorageManager(baseDataPath string) *StorageManager {
-	/* Old idea
-	dir, err := os.UserConfigDir()
-	if err != nil {
-		md.Logger.Panic("Failed to get user config directory: %v", err)
-	}
-	configRoot := filepath.Join(dir, "daws")
-	if _, err := os.Stat(configRoot); os.IsNotExist(err) {
-		md.Logger.Warn("Config directory does not exist, creating: %s", configRoot)
-		err := os.MkdirAll(configRoot, os.ModePerm)
-		if err != nil {
-			md.Logger.Panic("Failed to create config directory: %v", err)
-		}
-	}
-	*/
 
 	basePath := getBasePath()
 
 	if _, err := os.Stat(basePath); os.IsNotExist(err) {
-		md.Logger.Warn("Working directory does not exist, creating: %s", basePath)
+		utils.Logger.Warn("Working directory does not exist, creating: %s", basePath)
 		err := os.MkdirAll(basePath, os.ModePerm)
 		if err != nil {
-			md.Logger.Panic("Failed to create data directory: %v", err)
+			utils.Logger.Panic("Failed to create data directory: %v", err)
 		}
 	}
 
 	if isReadOnly(basePath) {
-		md.Logger.Panic("Working directory is read-only, cannot continue: ")
+		utils.Logger.Panic("Working directory is read-only, cannot continue: ")
 	}
 
 	configRoot := basePath
@@ -88,10 +74,10 @@ func NewStorageManager(baseDataPath string) *StorageManager {
 		pPath = filepath.Join(basePath, "projects")
 	}
 	if _, err := os.Stat(pPath); os.IsNotExist(err) {
-		md.Logger.Warn("Data directory does not exist, creating: %s", pPath)
+		utils.Logger.Warn("Data directory does not exist, creating: %s", pPath)
 		err := os.MkdirAll(pPath, os.ModePerm)
 		if err != nil {
-			md.Logger.Panic("Failed to create data directory: %v", err)
+			utils.Logger.Panic("Failed to create data directory: %v", err)
 		}
 	}
 	return &StorageManager{baseDir: configRoot, dataDir: pPath}
@@ -101,26 +87,26 @@ func (s *StorageManager) save(path string, data interface{}) error {
 	var err error
 	bytes, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
-		return md.Logger.Error("Failed to marshal data: %v", err)
+		return utils.Logger.Error("Failed to marshal data: %v", err)
 	}
 	err = os.WriteFile(path, bytes, os.ModePerm)
 	if err != nil {
-		return md.Logger.Error("Failed to write file: %v", err)
+		return utils.Logger.Error("Failed to write file: %v", err)
 	}
-	return md.Logger.Success("Data saved to %s", path)
+	return utils.Logger.Success("Data saved to %s", path)
 }
 
 func (s *StorageManager) load(path string, target interface{}) error {
 	var err error
 	bytes, err := os.ReadFile(path)
 	if err != nil {
-		return md.Logger.Error("Failed to read file: %v", err)
+		return utils.Logger.Error("Failed to read file: %v", err)
 	}
 	err = json.Unmarshal(bytes, target)
 	if err != nil {
-		return md.Logger.Error("Failed to unmarshal data: %v", err)
+		return utils.Logger.Error("Failed to unmarshal data: %v", err)
 	}
-	return md.Logger.Success("Data loaded from %s", path)
+	return utils.Logger.Success("Data loaded from %s", path)
 }
 
 func (s *StorageManager) GetDataDir() string {

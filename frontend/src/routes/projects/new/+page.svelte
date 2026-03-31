@@ -4,25 +4,63 @@
     import { models } from '$lib/wailsjs/go/models';
     import Button from '$lib/components/basic/button.svelte';
     import Input from '$lib/components/form/input.svelte';
+    import AwsCredentials from '$lib/components/form/awsCredentials.svelte';
+    import { onMount } from 'svelte';
+    import { configState } from '$lib/stores/config.svelte';
 
     let formData = $state(models.Project.createFrom({
         name: "",
         description: "",
-        awsAccount: "",
-        awsLocations: []
     }));
+
+    let awsCredentials = $state({
+        accessKey: "",
+        secretKey: "",
+        regions: [] as string[],
+    });
+
+    onMount( async () => {
+        console.log("Initial form data:", formData);
+        await projectState.refresh();
+        await configState.refresh();
+
+        const projectData : models.Project = {...projectState.data} as models.Project;
+        const configData : models.AppConfig = {...configState.data} as models.AppConfig;
+        awsCredentials.regions = projectData?.awsCredentials?.regions.length ? [...projectData.awsCredentials.regions] : [...configData.awsCredentials.regions];
+        awsCredentials.accessKey = projectData?.awsCredentials?.accessKey ? `${projectData.awsCredentials.accessKey}` : `${configData.awsCredentials.accessKey}`;
+        awsCredentials.secretKey = projectData?.awsCredentials?.secretKey ? `${projectData.awsCredentials.secretKey}` : `${configData.awsCredentials.secretKey}`;
+    });
 
     let errors = $state({
         name: "",
         description: "",
-        awsAccount: "",
+        awsAccessKey: "",
+        awsSecretKey: "",
+        awsRegion: "",
+    });
+
+    let warnings = $state({
+        name: "",
+        description: "",
+        awsAccessKey: "",
+        awsSecretKey: "",
+        awsRegion: "",
     });
 
     const validateForm = () => {
         errors = {
             name: "",
             description: "",
-            awsAccount: "",
+            awsAccessKey: "",
+            awsSecretKey: "",
+            awsRegion: "",
+        };
+        warnings = {
+            name: "",
+            description: "",
+            awsAccessKey: "",
+            awsSecretKey: "",
+            awsRegion: "",
         };
         if (!formData.name.trim()) {
             errors.name = "Project name is required.";
@@ -33,13 +71,19 @@
         if (!formData.description.trim()) {
             errors.description = "Project description is required.";
         }
-        if (!formData.awsAccount.trim()) {
-            errors.awsAccount = "AWS account is required.";
+        if (!awsCredentials.accessKey.trim()) {
+            errors.awsAccessKey = "AWS access key is required.";
         }
-        if (formData.awsAccount && !/^\d{12}$/.test(formData.awsAccount.trim())) {
-            errors.awsAccount = "AWS account must be a 12-digit number.";
+        if (awsCredentials.accessKey && !/^[A-Za-z0-9]{20}$/.test(awsCredentials.accessKey.trim())) {
+            errors.awsAccessKey = "AWS access key must be a 20-character string.";
         }
-        if (errors.name || errors.description || errors.awsAccount) {
+        if (!awsCredentials.secretKey.trim()) {
+            errors.awsSecretKey = "AWS secret key is required.";
+        }
+        if (!awsCredentials.regions.length) {
+            errors.awsRegion = "At least one AWS region is required.";
+        }
+        if (errors.name || errors.description || errors.awsAccessKey || errors.awsSecretKey || errors.awsRegion) {
             return false;
         }
         return true;
@@ -62,9 +106,10 @@
             return;
         }
         try {
-            await projectState.createProject(formData);
+            const outData = {...formData, awsCredentials: {...awsCredentials}} satisfies models.CreateProjectInput;
+            const err = await projectState.createProject(outData);
             goto(`/project/${encodeURIComponent(formData.name)}`);
-        } catch (error) {
+        } catch (error: any) {
             //alert(`Failed to create project: ${error.message}`);
             console.error(`Failed to create project: ${error.message}`);
             // do error states
@@ -82,10 +127,7 @@
     <Input label="Description" placeholder="Enter project description" bind:value={formData.description} errorMsg={errors.description} >
         <p>Provide a brief description of the project.</p>
     </Input>
-    <h2 class="form-page__subheader">AWS Account Information</h2>
-    <Input label="Account" placeholder="Enter AWS account" bind:value={formData.awsAccount} errorMsg={errors.awsAccount} >
-        <p>AWS account number must be a 12-digit number.</p>
-    </Input>
+    <AwsCredentials bind:awsCredentials {errors} {warnings} />
   </form>
   <Button subtype="add bottom" onClick={handleSubmit}>
     Submit Project

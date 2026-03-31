@@ -24,7 +24,7 @@ button {
 
 
 .form-page {
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
     background-color: #18181b;
     border-radius: $border-radius;
@@ -162,6 +162,32 @@ button {
             .icon {
                 margin-right: $padding;
             }
+        }
+    }
+}
+
+.validation-errors {
+    .icon {
+        display: inline-block;
+        margin-right: calc($padding * 1.5);
+    }
+    p {
+        padding: 0;
+        padding-left: calc($padding * 2);
+        margin: 0;
+        text-align: left;
+        font-size: 14px;
+    }
+    .error {
+        color: $clr_error;
+        flex: 3;
+    }
+    .warning {
+        color: $clr_warning;
+        flex: 3;
+
+        .icon {
+            margin-right: $padding;
         }
     }
 }

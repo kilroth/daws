@@ -59,6 +59,7 @@
     .tooltip {
         position: relative;
         display: inline-block;
+        z-index: 3;
 
         .tooltip-icon {
             background-color: transparent;

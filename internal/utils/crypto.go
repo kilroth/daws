@@ -1,4 +1,4 @@
-package storage
+package utils
 
 import (
 	"crypto/aes"
@@ -9,8 +9,6 @@ import (
 	"io"
 
 	"github.com/denisbrodbeck/machineid"
-
-	md "daws/internal/models"
 )
 
 //var masterKey = []byte("my-very-strong-master-key") // In production, use a secure key management solution
@@ -43,23 +41,23 @@ func Encrypt(plainText string) (string, error) {
 		return plainText, nil
 	}
 	if plainText == "" {
-		return "", md.Logger.Error("Cannot encrypt empty string")
+		return "", Logger.Error("Cannot encrypt empty string")
 	}
 	masterKey, err := getMasterKey()
 	if err != nil {
-		return "", md.Logger.Error("Failed to get master key: %v", err)
+		return "", Logger.Error("Failed to get master key: %v", err)
 	}
 	block, err := aes.NewCipher(masterKey)
 	if err != nil {
-		return "", md.Logger.Error("Failed to create cipher block: %v", err)
+		return "", Logger.Error("Failed to create cipher block: %v", err)
 	}
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", md.Logger.Error("Failed to create GCM: %v", err)
+		return "", Logger.Error("Failed to create GCM: %v", err)
 	}
 	nonce := make([]byte, gcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return "", md.Logger.Error("Failed to generate nonce: %v", err)
+		return "", Logger.Error("Failed to generate nonce: %v", err)
 	}
 	cipherText := gcm.Seal(nonce, nonce, []byte(plainText), nil)
 	return base64.StdEncoding.EncodeToString(cipherText), nil
@@ -67,32 +65,32 @@ func Encrypt(plainText string) (string, error) {
 
 func Decrypt(cipherText string) (string, error) {
 	if cipherText == "" {
-		return "", md.Logger.Error("Cannot decrypt empty string")
+		return "", Logger.Error("Cannot decrypt empty string")
 	}
 	masterKey, err := getMasterKey()
 	if err != nil {
-		return "", md.Logger.Error("Failed to get master key: %v", err)
+		return "", Logger.Error("Failed to get master key: %v", err)
 	}
 	data, err := base64.StdEncoding.DecodeString(cipherText)
 	if err != nil {
-		return "", md.Logger.Error("Failed to decode cipher text: %v", err)
+		return "", Logger.Error("Failed to decode cipher text: %v", err)
 	}
 	block, err := aes.NewCipher(masterKey)
 	if err != nil {
-		return "", md.Logger.Error("Failed to create cipher block: %v", err)
+		return "", Logger.Error("Failed to create cipher block: %v", err)
 	}
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", md.Logger.Error("Failed to create GCM: %v", err)
+		return "", Logger.Error("Failed to create GCM: %v", err)
 	}
 	nonceSize := gcm.NonceSize()
 	if len(data) < nonceSize {
-		return "", md.Logger.Error("Cipher text too short")
+		return "", Logger.Error("Cipher text too short")
 	}
 	nonce, cipherTextBytes := data[:nonceSize], data[nonceSize:]
 	plainText, err := gcm.Open(nil, nonce, cipherTextBytes, nil)
 	if err != nil {
-		return "", md.Logger.Error("Failed to decrypt: %v", err)
+		return "", Logger.Error("Failed to decrypt: %v", err)
 	}
 	return string(plainText), nil
 }

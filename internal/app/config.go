@@ -2,23 +2,15 @@ package app
 
 import (
 	md "daws/internal/models"
-	"daws/internal/storage"
 	sm "daws/internal/storage"
+	"daws/internal/utils"
 )
 
 func (a *App) ConfigSave(config md.AppConfig) error {
-	encKey, err := storage.Encrypt(config.AWSAccessKey)
+	err := config.AWSCredentials.EncryptAll()
 	if err != nil {
-		return md.Logger.Error("Failed to get encryption key: %v", err)
+		return utils.Logger.Error("Failed to encrypt AWS credentials: %v", err)
 	}
-
-	encSecretKey, err := storage.Encrypt(config.AWSSecretKey)
-	if err != nil {
-		return md.Logger.Error("Failed to get encryption key: %v", err)
-	}
-
-	config.AWSAccessKey = encKey
-	config.AWSSecretKey = encSecretKey
 
 	return a.SM.SaveConfig(config)
 }
@@ -32,7 +24,7 @@ func (a *App) ConfigLoad() (md.AppConfig, error) {
 		config = md.AppConfig{
 			Theme: "light",
 		}
-		md.Logger.Info("No existing config found, creating new one with defaults")
+		utils.Logger.Info("No existing config found, creating new one with defaults")
 		// create new storage manager
 		a.SM = sm.NewStorageManager(config.DataPath)
 		// manager sets default data path
@@ -46,25 +38,11 @@ func (a *App) ConfigLoad() (md.AppConfig, error) {
 }
 
 // get decrypted AWS access key for use in the app
-func (a *App) GetAWSAccessKey() (string, error) {
-	if a.Config.AWSAccessKey == "" {
-		return "", nil
-	}
-	decKey, err := storage.Decrypt(a.Config.AWSAccessKey)
-	if err != nil {
-		return "", md.Logger.Error("Failed to get decryption key: %v", err)
-	}
-	return decKey, nil
+func (a *App) GetDefaultAWSAccessKey() (string, error) {
+	return a.Config.AWSCredentials.GetDecryptedAccessKey()
 }
 
 // get decrypted AWS secret key for use in the app
-func (a *App) GetAWSSecretKey() (string, error) {
-	if a.Config.AWSSecretKey == "" {
-		return "", nil
-	}
-	decKey, err := storage.Decrypt(a.Config.AWSSecretKey)
-	if err != nil {
-		return "", md.Logger.Error("Failed to get decryption key: %v", err)
-	}
-	return decKey, nil
+func (a *App) GetDefaultAWSSecretKey() (string, error) {
+	return a.Config.AWSCredentials.GetDecryptedSecretKey()
 }

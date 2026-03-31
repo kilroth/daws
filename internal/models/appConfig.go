@@ -1,11 +1,9 @@
 package models
 
 type AppConfig struct {
-	AWSAccessKey string `json:"awsAccessKey"`
-	AWSSecretKey string `json:"awsSecretKey"`
-	AWSRegion    string `json:"awsRegion"`
-	Theme        string `json:"theme"`
-	DataPath     string `json:"dataPath"`
+	AWSCredentials AWSCredentials `json:"awsCredentials"`
+	Theme          string         `json:"theme"`
+	DataPath       string         `json:"dataPath"`
 }
 
 func (c *AppConfig) Save() error {

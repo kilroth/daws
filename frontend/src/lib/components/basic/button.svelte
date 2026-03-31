@@ -89,10 +89,6 @@
             }
         }
 
-        
-
-        
-
         &.error {
             background-color: $clr_error;
             color: white;

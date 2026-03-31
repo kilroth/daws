@@ -207,6 +207,7 @@
             max-height: 300px;
             overflow-y: auto;
             position: absolute;
+            z-index: 10;
             
             scrollbar-width: thin;
             scrollbar-color: $clr_light transparent;
