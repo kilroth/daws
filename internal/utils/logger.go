@@ -20,6 +20,19 @@ var colors = map[string]string{
 	"RESET":   "\033[0m",  // Reset
 }
 
+var bgColors = map[string]string{
+	"INFO":    "\033[44m", // Blue background
+	"ERROR":   "\033[41m", // Red background
+	"DEBUG":   "\033[46m", // Cyan background
+	"WARN":    "\033[43m", // Yellow background
+	"LOG":     "\033[0m",  // Default background
+	"SUCCESS": "\033[42m", // Green background
+	"FATAL":   "\033[41m", // Red background
+	"PANIC":   "\033[41m", // Red background
+	"TRACE":   "\033[45m", // Magenta background
+	"RESET":   "\033[0m",  // Reset
+}
+
 type logger struct {
 	Level   string `json:"level"`
 	Message string `json:"message"`

@@ -6,6 +6,7 @@
     import {configState} from '$lib/stores/config.svelte';
     import { OpenFolderDialog } from '$lib/wailsjs/go/app/App';
     import AwsCredentials from '$lib/components/form/awsCredentials.svelte';
+    import { goto } from '$app/navigation';
 
     let defaultDataPath = "";
 
@@ -36,9 +37,7 @@
 
     onMount(async () => {
         await configState.refresh();
-        console.log("Loaded config:", configState.data);
         const data : models.AppConfig = {...configState.data} as models.AppConfig;
-        console.log("Config data:", data);
 
         formData.dataPath = data.dataPath;
         defaultDataPath = formData.dataPath;
@@ -98,12 +97,17 @@
         }
 
         console.log("Submitting config:", formData);
-        await configState.saveConfig({
-            dataPath: formData.dataPath,
-            theme: configState.data?.theme || "light",
-            awsCredentials,
-        });
-        await configState.refresh();
+        
+        try {
+            const outData = {...formData, awsCredentials: {...awsCredentials}, theme: configState.data?.theme || "light"} satisfies models.AppConfig;
+            await configState.saveConfig(outData);
+        } catch (err) {
+            console.error("Failed to save config:", err);
+            // TODO: show error in UI instead of alert
+            //alert("Failed to save config: " + err);
+            return;
+        }
+        goto('/'); // redirect to home page after saving config
     }
 
     const handleOpenDirectorSelector = async () => {

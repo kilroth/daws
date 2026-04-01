@@ -11,7 +11,7 @@
 
     let showTooltip = $state(false);
 
-    let tooltipTimeout = $state();
+    let tooltipTimeout : ReturnType<typeof setTimeout> | undefined = $state(undefined);
 
     const handleMouseEnter = () => {
         if (!disabled) {

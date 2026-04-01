@@ -1,14 +1,17 @@
 package models
 
+import "daws/internal/utils"
+
 type Branch struct {
 	Name           string         `json:"name"`
+	Slug           string         `json:"slug"`
 	GitName        string         `json:"gitName"`
 	Description    string         `json:"description"`
 	AWSCredentials AWSCredentials `json:"awsCredentials"`
 	AWSLocations   []AWSLocation  `json:"awsLocations"`
-	LastBuild      string         `json:"lastBuild"`
 	IsActive       bool           `json:"isActive"`
 	Archived       bool           `json:"archived"`
+	TimeData       TimeData       `json:"timeData"`
 }
 
 func (b *Branch) Deploy() error {
@@ -22,7 +25,7 @@ func (b *Branch) RunTests() error {
 }
 
 func (b *Branch) Save_Preprocess() error {
-	var err error
-	err = b.AWSCredentials.EncryptAll()
-	return err
+	b.TimeData.Create()
+	b.Slug = utils.Slugify(b.Name)
+	return b.AWSCredentials.EncryptAll()
 }

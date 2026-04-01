@@ -19,8 +19,6 @@
         regions: [] as string[],
     });
 
-    console.log('initial aws credentials:', {awsCredentials, errors, warnings});
-
     onMount(() => {
         const data = {...configState.data} as models.AppConfig;
         if (data?.awsCredentials) {
@@ -31,7 +29,6 @@
 
         editingAccessKey = awsCredentials.awsAccessKey == "";
         editingSecretKey = awsCredentials.awsSecretKey == "";
-        console.log('mounting')
     });
 
     let displayAccessKey = $derived.by(() => {

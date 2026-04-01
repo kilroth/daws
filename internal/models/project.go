@@ -1,17 +1,17 @@
 package models
 
-import "daws/internal/utils"
+import (
+	"daws/internal/utils"
+)
 
 type Project struct {
 	Name           string          `json:"name"`
+	Slug           string          `json:"slug"`
 	Description    string          `json:"description"`
 	Repos          map[string]Repo `json:"repos"`
 	AWSCredentials AWSCredentials  `json:"awsCredentials"`
-	AWSLocations   []AWSLocation   `json:"awsLocations"`
-	LastDeploy     string          `json:"lastDeploy"`
-	LastBuild      string          `json:"lastBuild"`
-	LastTest       string          `json:"lastTest"`
 	Archived       bool            `json:"archived"`
+	TimeData       TimeData        `json:"timeData"`
 }
 
 func (p *Project) Deploy() error {
@@ -45,14 +45,13 @@ func (p *Project) NewRepo(repo *Repo) error {
 	if p.Repos == nil {
 		p.Repos = make(map[string]Repo)
 	}
-	if _, exists := p.Repos[repo.Name]; exists {
-		return utils.Logger.Error("Repo with name %s already exists", repo.Name)
+	repo.Slug = utils.Slugify(repo.Name)
+	if _, exists := p.Repos[repo.Slug]; exists {
+		return utils.Logger.Error("Repo with name %s already exists", repo.Slug)
 	}
-	newRepo := Repo{
-		Name:        repo.Name,
-		Description: repo.Description,
-	}
-	p.Repos[repo.Name] = newRepo
+
+	repo.TimeData.Create()
+	p.Repos[repo.Slug] = *repo
 	return nil
 }
 
@@ -79,7 +78,9 @@ func (p *Project) UpdateRepo(repoName string, repo *Repo) error {
 	}
 	branches := p.Repos[repoName].Branches
 	repo.Branches = branches
-	p.Repos[repoName] = *repo
+	repo.Slug = utils.Slugify(repo.Name)
+	repo.TimeData.Update()
+	p.Repos[repo.Slug] = *repo
 	return nil
 }
 
@@ -166,5 +167,8 @@ func (p *Project) Save_Preprocess() error {
 			return utils.Logger.Error("Failed to preprocess repo %s: %v", repoName, err)
 		}
 	}
+
+	p.Slug = utils.Slugify(p.Name)
+	p.TimeData.Create()
 	return err
 }

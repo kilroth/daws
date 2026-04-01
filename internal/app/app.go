@@ -31,3 +31,7 @@ func (a *App) OpenFolderDialog() (string, error) {
 	}
 	return path, nil
 }
+
+func (a *App) Slugify(name string) string {
+	return utils.Slugify(name)
+}

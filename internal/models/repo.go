@@ -1,9 +1,12 @@
 package models
 
-import "daws/internal/utils"
+import (
+	"daws/internal/utils"
+)
 
 type Repo struct {
 	Name            string            `json:"name"`
+	Slug            string            `json:"slug"`
 	Description     string            `json:"description"`
 	Path            string            `json:"path"`
 	Branches        map[string]Branch `json:"branches"`
@@ -12,7 +15,7 @@ type Repo struct {
 	AWSLocations    []AWSLocation     `json:"awsLocations"`
 	DockerImageName string            `json:"dockerImageName"`
 	TestScripts     []string          `json:"testScripts"`
-	LastBuild       string            `json:"lastBuild"`
+	TimeData        TimeData          `json:"timeData"`
 	Archived        bool              `json:"archived"`
 }
 
@@ -33,14 +36,15 @@ func (r *Repo) NewBranch(branch *Branch) error {
 	if branch.Name == "" {
 		return utils.Logger.Error("Branch name cannot be empty")
 	}
-	if _, exists := r.Branches[branch.Name]; exists {
-		return utils.Logger.Error("Branch with name %s already exists", branch.Name)
+	branch.Slug = utils.Slugify(branch.Name)
+	if _, exists := r.Branches[branch.Slug]; exists {
+		return utils.Logger.Error("Branch with name %s already exists", branch.Slug)
 	}
 	if r.Branches == nil {
 		r.Branches = make(map[string]Branch)
 	}
-
-	r.Branches[branch.Name] = *branch
+	branch.TimeData.Create()
+	r.Branches[branch.Slug] = *branch
 	return nil
 }
 
@@ -62,6 +66,8 @@ func (r *Repo) UpdateBranch(branchName string, branch *Branch) error {
 	if _, exists := r.Branches[branchName]; !exists {
 		return utils.Logger.Error("Branch with name %s does not exist", branchName)
 	}
+	branch.TimeData.Update()
+	branch.Slug = utils.Slugify(branch.Name)
 	r.Branches[branchName] = *branch
 	return nil
 }
@@ -83,5 +89,7 @@ func (r *Repo) Save_Preprocess() error {
 			return utils.Logger.Error("Failed to preprocess branch %s: %v", branchName, err)
 		}
 	}
+	r.Slug = utils.Slugify(r.Name)
+	r.TimeData.Create()
 	return err
 }

@@ -7,6 +7,7 @@
     import AwsCredentials from '$lib/components/form/awsCredentials.svelte';
     import { onMount } from 'svelte';
     import { configState } from '$lib/stores/config.svelte';
+    import { Slugify } from '$lib/wailsjs/go/app/App';
 
     let formData = $state(models.Project.createFrom({
         name: "",
@@ -20,9 +21,8 @@
     });
 
     onMount( async () => {
-        console.log("Initial form data:", formData);
-        await projectState.refresh();
         await configState.refresh();
+        await projectState.refresh();
 
         const projectData : models.Project = {...projectState.data} as models.Project;
         const configData : models.AppConfig = {...configState.data} as models.AppConfig;
@@ -90,30 +90,25 @@
     };
 
     async function handleSubmit() {
-        /*
-        const projectName = prompt("Enter a name for the new project:");
-        if (projectName) {
-        try {
-            await projectState.createProject({ Name: projectName });
-            goto(`/project/${encodeURIComponent(projectName)}`);
-        } catch (error) {
-            alert(`Failed to create project: ${error.message}`);
-        }
-        }
-        */
-
         if(!validateForm()) {
             return;
         }
+        const dest = await Slugify(formData.name);
         try {
-            const outData = {...formData, awsCredentials: {...awsCredentials}} satisfies models.CreateProjectInput;
-            const err = await projectState.createProject(outData);
-            goto(`/project/${encodeURIComponent(formData.name)}`);
+            const outData = models.Project.createFrom({
+                ...formData,
+                awsCredentials: {...awsCredentials}
+            });
+            await projectState.createProject(outData);
         } catch (error: any) {
             //alert(`Failed to create project: ${error.message}`);
             console.error(`Failed to create project: ${error.message}`);
             // do error states
-        }       
+            return;
+        }
+        setTimeout(() => {
+            goto(`/projects/${dest}`);
+        }, 1000);
     }
 
 </script>

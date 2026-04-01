@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type StorageManager struct {
@@ -44,11 +43,6 @@ func isReadOnly(dir string) bool {
 	// Clean up if it worked
 	os.Remove(testFile)
 	return false
-}
-
-func slugify(name string) string {
-	tmpName := strings.ReplaceAll(name, " ", "-")
-	return tmpName // TODO: implement slugification
 }
 
 func NewStorageManager(baseDataPath string) *StorageManager {

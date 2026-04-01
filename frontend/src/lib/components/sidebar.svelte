@@ -2,15 +2,12 @@
   import { projectState } from '$lib/stores/project.svelte';
   import {goto} from '$app/navigation';
     import Button from './basic/button.svelte';
+    import ProjectChip from './projectChip.svelte';
 
   async function handleAddProject() {
     goto('/projects/new');
   }
-
-  const handleProjectClick = (projectName: string) => {
-    goto(`/project/${encodeURIComponent(projectName)}`);
-  }
-
+  
   const handleConfigClick = () => {
     goto('/config');
   }
@@ -29,13 +26,7 @@
         <p>No projects found. Use the button below to create your first project.</p>
       {:else}
         {#each Object.values(projectState.data.projects) as project}
-        <Button subtype="primary" onClick={() => {handleProjectClick(project.name)}}>
-          {project.name}
-        </Button>
-          <div class="project-button">
-            <a href={`/project/${encodeURIComponent(project.name)}`} class="project-link">{project.name}</a>
-            <button on:click={() => projectState.deleteProject(project.name)}>Delete</button>
-          </div>
+          <ProjectChip data={project} />
         {/each}
       {/if}
     </nav>

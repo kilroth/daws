@@ -30,7 +30,7 @@
         border-radius: $border-radius;
         cursor: pointer;
         font-size: 18px;
-        transition: background-color 0.2s ease;
+        transition: all 0.2s ease;
         background-color: #f0f0f0;
         color: #333;
         font-weight: bold;
